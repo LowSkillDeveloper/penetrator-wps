@@ -85,9 +85,6 @@ unsigned char dh_p[192] = {
     0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
 };
 
-#include <openssl/hmac.h>
-#include <stdlib.h>
-
 // Fast Hotfix for compatibility with new OpenSSL
 void *sha256_hmac(char *key, int klen, char *data, int datalen) {
     unsigned char *ret = malloc(32);
