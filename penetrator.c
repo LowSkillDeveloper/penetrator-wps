@@ -85,17 +85,25 @@ unsigned char dh_p[192] = {
     0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
 };
 
-void *sha256_hmac(char *key,int klen,char *data,int datalen){
-  unsigned char *ret=malloc(32);
-  unsigned int l=32;
-  HMAC_CTX ctx;
-  HMAC_CTX_init(&ctx);
-  HMAC_Init_ex(&ctx,key,klen,EVP_sha256(),0);
-  HMAC_Update(&ctx,(unsigned char*)data,datalen);
-  HMAC_Final(&ctx,ret,&l);
-  HMAC_CTX_cleanup(&ctx);
-  return ret;
+#include <openssl/hmac.h>
+#include <stdlib.h>
+
+// Fast Hotfix for compatibility with new OpenSSL
+void *sha256_hmac(char *key, int klen, char *data, int datalen) {
+    unsigned char *ret = malloc(32);
+    unsigned int l = 32;
+    HMAC_CTX *ctx = HMAC_CTX_new();
+    if (!ctx) {
+        free(ret);
+        return NULL;
+    }
+    HMAC_Init_ex(ctx, key, klen, EVP_sha256(), NULL);
+    HMAC_Update(ctx, (unsigned char*)data, datalen);
+    HMAC_Final(ctx, ret, &l);
+    HMAC_CTX_free(ctx);
+    return ret;
 }
+
 
 void *kdf(void *kdk,char *label,int size){
 	int slen=strlen(label);
@@ -879,39 +887,49 @@ int parse_m1(ATTACK_INFO *attack){
   return 0;
 }
 
-void dh_get(ATTACK_INFO *attack,void *mysecret, void *mypublic){
-  DH *dh=DH_new();
-  dh->p=BN_bin2bn(dh_p,192,NULL);
-  dh->g=BN_bin2bn(dh_g,1,NULL);
+// Fast Hotfix for compatibility with new OpenSSL
+void dh_get(ATTACK_INFO *attack, void *mysecret, void *mypublic) {
+    DH *dh = DH_new();
+    BIGNUM *p = NULL, *g = NULL;
+    if (!(p = BN_bin2bn(dh_p, 192, NULL)) || !(g = BN_bin2bn(dh_g, 1, NULL)) || !DH_set0_pqg(dh, p, NULL, g)) {
+        DH_free(dh);
+        BN_free(p);
+        BN_free(g);
+        return;
+    }
 
-  DH_generate_key(dh);
-  BN_bn2bin(dh->priv_key,mysecret);
-  BN_bn2bin(dh->pub_key,mypublic);
+    DH_generate_key(dh);
 
-  char publickey[2048];
-  int len=hex2raw(attack->pke,publickey);
-  BIGNUM *pkey=BN_bin2bn((unsigned char*)publickey,len,NULL);
+    const BIGNUM *priv_key, *pub_key;
+    DH_get0_key(dh, &pub_key, &priv_key);
 
-  DH_compute_key((unsigned char*)attack->secret,pkey,dh);
- 
-  BN_free(pkey);
-  DH_free(dh);
+    BN_bn2bin(priv_key, (unsigned char*)mysecret);
+    BN_bn2bin(pub_key, (unsigned char*)mypublic);
 
-  char hashme[8194];
-  char tgt[32];
-  int2hex(attack->tgt_mac,tgt);
+    char publickey[2048];
+    int len = hex2raw(attack->pke, publickey);
+    BIGNUM *pkey = BN_bin2bn((unsigned char*)publickey, len, NULL);
 
-  hex2raw(attack->enonce,hashme);
-  hex2raw(tgt,hashme+16);
-  hex2raw(attack->rnonce,hashme+22);
+    DH_compute_key((unsigned char*)attack->secret, pkey, dh);
 
-  char *kdk=sha256_hmac(attack->secret,192,hashme,38);
+    BN_free(pkey);
+    DH_free(dh);
 
-  char *derived=kdf(kdk,"Wi-Fi Easy and Secure Key Derivation",640);
-  memcpy(attack->derived,derived,80);
+    char hashme[8194];
+    char tgt[32];
+    int2hex(attack->tgt_mac, tgt);
 
-  free(kdk);
-  free(derived);
+    hex2raw(attack->enonce, hashme);
+    hex2raw(tgt, hashme + 16);
+    hex2raw(attack->rnonce, hashme + 22);
+
+    char *kdk = sha256_hmac(attack->secret, 192, hashme, 38);
+
+    char *derived = kdf(kdk, "Wi-Fi Easy and Secure Key Derivation", 640);
+    memcpy(attack->derived, derived, 80);
+
+    free(kdk);
+    free(derived);
 }
 
 void add_auth(ATTACK_INFO *attack,char *packet,int *len,void *last, int llen){
