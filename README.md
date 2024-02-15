@@ -27,7 +27,7 @@ Then, just run ./install.sh and run 'penetrator'
 <b>-t</b> <seconds>Set time limit for scanning (default 10)<br>
 <b>-T</b> <ms> Set timeout - when it occurs, resend last packet (default 1000)<br>
 <b>-R</b> <max> Set maximum resends (default 5)\n");<br>
-<b>-S</b> <seconds> Sleep after 10 failures in a row (default 60)<br>
+<b>-S</b> <seconds> Sleep after 10 failures in a row (default 61)<br>
 <b>-N</b> Ignore NACKs (debug)<br>
 
 # attack modes/examples
