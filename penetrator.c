@@ -1984,9 +1984,9 @@ void help(char *prog){
   printf("\t-v\t\tverbose - print info about WPS messages etc\n");
   printf("\t-vv\t\tverbose level 2 - print pixiewps data\n");
   printf("\t-t <seconds>\tSet time limit for scanning (default 10)\n");
-  printf("\t-T <ms>\t\tSet timeout - when it occurs, resend last packet (default 1)\n");
+  printf("\t-T <ms>\t\tSet timeout - when it occurs, resend last packet (default 1000)\n");
   printf("\t-R <max>\t\tSet maximum resends (default 5)\n");
-  printf("\t-S <seconds>\tSleep after 10 failures in a row (default 60)\n");
+  printf("\t-S <seconds>\tSleep after 10 failures in a row (default 61)\n");
   printf("\t-N \t\tIgnore NACKs (debug)\n");
   printf("\nUsage examples:\n");
   printf("Attack APs with BSSID1 and BSSID2 on channel 1:\n\t%s -i mon0 -c 1 -b BSSID1 -b BSSID2\n\n",prog);
