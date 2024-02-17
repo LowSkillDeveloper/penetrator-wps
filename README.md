@@ -25,7 +25,7 @@ Then, just run ./install.sh and run 'penetrator'
 <b>-v</b> verbose - print info about WPS messages etc<br>
 <b>-vv</b> verbose level 2 - print pixiewps data<br>
 <b>-t</b> <seconds>Set time limit for scanning (default 10)<br>
-<b>-T</b> <ms> Set timeout - when it occurs, resend last packet (default 1000)<br>
+<b>-T</b> <ms> Set timeout - when it occurs, resend last packet (default 1000 ms = 1 s)<br>
 <b>-R</b> <max> Set maximum resends (default 5)\n");<br>
 <b>-S</b> <seconds> Sleep after 10 failures in a row (default 61)<br>
 <b>-N</b> Ignore NACKs (debug)<br>
