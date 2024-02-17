@@ -1981,7 +1981,7 @@ void help(char *prog){
   printf("\t-v\t\tverbose - print info about WPS messages etc\n");
   printf("\t-vv\t\tverbose level 2 - print pixiewps data\n");
   printf("\t-t <seconds>\tSet time limit for scanning (default 10)\n");
-  printf("\t-T <ms>\t\tSet timeout - when it occurs, resend last packet (default 1000)\n");
+  printf("\t-T <ms>\t\tSet timeout - when it occurs, resend last packet (default 1000 ms = 1 s)\n");
   printf("\t-R <max>\t\tSet maximum resends (default 5)\n");
   printf("\t-S <seconds>\tSleep after 10 failures in a row (default 61)\n");
   printf("\t-N \t\tIgnore NACKs (debug)\n");
